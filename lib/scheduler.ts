@@ -69,7 +69,11 @@ export async function createAutomaticGame() {
   try {
     const now = new Date();
     const nextHour = new Date(now);
-    nextHour.setHours(nextHour.getHours() + 1);
+    
+    // Si ya pasamos del minuto 0, programar para la próxima hora
+    if (now.getMinutes() > 0) {
+      nextHour.setHours(nextHour.getHours() + 1);
+    }
     nextHour.setMinutes(0, 0, 0);
 
     // Verificar si ya existe un juego para esa hora
@@ -81,7 +85,7 @@ export async function createAutomaticGame() {
     });
 
     if (existingGame) {
-      console.log(`Juego ya existe para ${nextHour.toISOString()}`);
+      console.log(`Juego ya existe para ${nextHour.toLocaleString('es-ES')}`);
       return existingGame;
     }
 
@@ -105,12 +109,12 @@ export async function executeScheduledGames() {
   try {
     const now = new Date();
     
-    // Buscar juegos que deberían ejecutarse (con 5 minutos de tolerancia)
+    // Buscar juegos que ya deberían haberse ejecutado (hora programada ya pasó)
     const gamesToExecute = await prisma.automaticGame.findMany({
       where: {
         status: 'pending',
         scheduledFor: {
-          lte: new Date(now.getTime() + 5 * 60 * 1000), // 5 minutos de tolerancia
+          lte: now, // Ejecutar todos los juegos cuya hora ya pasó
         },
       },
       include: {
@@ -120,20 +124,19 @@ export async function executeScheduledGames() {
 
     for (const game of gamesToExecute) {
       try {
-        // Solo ejecutar si hay apuestas o si ya pasó más de 10 minutos de la hora programada
-        const timeDiff = now.getTime() - game.scheduledFor.getTime();
-        const hasTimeout = timeDiff > 10 * 60 * 1000; // 10 minutos después
+        console.log(`🎯 Ejecutando juego ${game.id.slice(-8)} programado para ${game.scheduledFor.toLocaleString('es-ES')}`);
+        console.log(`📊 Apuestas totales: ${game.physicalBets.length}`);
         
-        if (game.physicalBets.length > 0 || hasTimeout) {
-          console.log(`🎯 Ejecutando juego ${game.id.slice(-8)} programado para ${game.scheduledFor.toLocaleString('es-ES')}`);
-          
-          // Calcular probabilidades
-          const probabilities = calculateProbabilities(game.physicalBets);
-          
-          // Seleccionar número ganador
-          const winningNumber = selectWinningNumber(probabilities);
-          
-          // Actualizar apuestas ganadoras
+        // Calcular probabilidades (la casa siempre debe ganar)
+        const probabilities = calculateProbabilities(game.physicalBets);
+        
+        // Seleccionar número ganador
+        const winningNumber = selectWinningNumber(probabilities);
+        
+        console.log(`🎲 Número ganador seleccionado: ${winningNumber}`);
+        
+        // Actualizar apuestas ganadoras si las hay
+        if (game.physicalBets.length > 0) {
           await prisma.physicalBet.updateMany({
             where: {
               gameId: game.id,
@@ -144,21 +147,24 @@ export async function executeScheduledGames() {
               payout: { multiply: 30 },
             },
           });
-
-          // Actualizar el juego
-          await prisma.automaticGame.update({
-            where: { id: game.id },
-            data: {
-              status: 'completed',
-              winningNumber: winningNumber,
-              completedAt: now,
-            },
-          });
-
-          console.log(`✅ Juego ${game.id.slice(-8)} completado. Número ganador: ${winningNumber}`);
-        } else {
-          console.log(`⏳ Juego ${game.id.slice(-8)} esperando apuestas...`);
         }
+
+        // Actualizar el juego
+        await prisma.automaticGame.update({
+          where: { id: game.id },
+          data: {
+            status: 'completed',
+            winningNumber: winningNumber,
+            completedAt: now,
+          },
+        });
+
+        console.log(`✅ Juego ${game.id.slice(-8)} completado. Número ganador: ${winningNumber}`);
+        
+        // Mostrar estadísticas de ganadores
+        const winners = game.physicalBets.filter(bet => bet.chosenNumber === winningNumber);
+        console.log(`🏆 Ganadores: ${winners.length} de ${game.physicalBets.length} apostadores`);
+        
       } catch (error) {
         console.error(`❌ Error ejecutando juego ${game.id}:`, error);
       }
@@ -195,16 +201,16 @@ export async function cleanupOldGames() {
 export function initializeScheduler() {
   console.log('🚀 Iniciando programador automático de ruleta...');
 
-  // Crear juego cada hora a los 5 minutos pasados (ej: 10:05, 11:05, 12:05)
-  cron.schedule('5 * * * *', async () => {
+  // Crear juego cada hora en punto (ej: 10:00, 11:00, 12:00)
+  cron.schedule('0 * * * *', async () => {
     console.log('⏰ Creando nuevo juego automático...');
     await createAutomaticGame();
   }, {
     timezone: "America/Bogota" // Ajusta según tu zona horaria
   });
 
-  // Ejecutar juegos cada 5 minutos
-  cron.schedule('*/5 * * * *', async () => {
+  // Ejecutar juegos cada minuto para asegurar ejecución inmediata
+  cron.schedule('* * * * *', async () => {
     await executeScheduledGames();
   });
 
@@ -237,14 +243,19 @@ export function initializeScheduler() {
         console.log('🎮 Creando juego inicial...');
         await createAutomaticGame();
       }
+      
+      // También ejecutar juegos pendientes al iniciar
+      console.log('🔍 Verificando juegos pendientes al iniciar...');
+      await executeScheduledGames();
+      
     } catch (error) {
       console.error('❌ Error creando juego inicial:', error);
     }
   }, 2000);
 
   console.log('✅ Programador automático iniciado exitosamente');
-  console.log('📅 Próximos juegos se crearán automáticamente cada hora');
-  console.log('🎯 Los juegos se ejecutarán automáticamente según programación');
+  console.log('📅 Próximos juegos se crearán automáticamente cada hora en punto');
+  console.log('🎯 Los juegos se ejecutarán automáticamente en su hora programada');
 }
 
 // Función para detener el programador
