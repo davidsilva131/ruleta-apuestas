@@ -319,7 +319,7 @@ export default function Home() {
             {/* Información adicional */}
             <footer className="text-center mt-4 text-gray-600 dark:text-gray-400 text-xs flex-shrink-0 py-2">
               <p>🍀 ¡Que la suerte esté de tu lado! • Juega responsablemente</p>
-              <p className="mt-1">Probabilidad de ganar: 3.33% (1/30) • Pago: 30:1</p>
+              <p className="mt-1">Probabilidad de ganar: 2% • Pago: 30:1</p>
             </footer>
           </div>
         )}

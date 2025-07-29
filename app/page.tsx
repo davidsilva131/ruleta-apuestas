@@ -68,7 +68,7 @@ export default function PublicHome() {
               <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Ruleta Manual</h3>
               <p className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed">
                 Juega en tiempo real, elige tu número de la suerte y observa la ruleta girar. 
-                Probabilidad de ganar: 1/30, pago: 30:1
+                Probabilidad de ganar: 2%, pago: 30:1
               </p>
             </div>
 
@@ -132,7 +132,7 @@ export default function PublicHome() {
           <div className="text-4xl mb-6">🍀</div>
           <p className="text-xl text-gray-700 dark:text-gray-300 mb-6 font-medium">¡Que la suerte esté de tu lado!</p>
           <p className="text-gray-600 dark:text-gray-400 text-lg mb-8">
-            Juega responsablemente • Probabilidad de ganar: 3.33% (1/30) • Pago: 30:1
+            Juega responsablemente • Probabilidad de ganar: 2% • Pago: 30:1
           </p>
           <div className="space-y-3">
             <p className="text-base text-gray-600 dark:text-gray-400">Ruleta Casino © 2025</p>
