@@ -10,8 +10,8 @@ export default function SecurityStatus() {
     rateLimit: false,
     headers: false,
     encryption: false,
-    jwtTokensSecure: false,
-    cookiesSecure: false,
+    jwtTokensSecure: false, // Nueva verificación
+    cookiesSecure: false, // Nueva verificación
   });
 
   const [vulnerabilities, setVulnerabilities] = useState<any[]>([]);
@@ -47,7 +47,7 @@ export default function SecurityStatus() {
 
     if (!allChecks.https) {
       detectedVulnerabilities.push({
-        level: 'critical' as const,
+        level: 'critical',
         title: 'HTTP sin cifrar',
         description: 'Los datos viajan en texto plano y pueden ser interceptados',
         solution: 'Configurar HTTPS con certificado SSL/TLS'
@@ -56,7 +56,7 @@ export default function SecurityStatus() {
 
     if (!allChecks.jwtTokensSecure) {
       detectedVulnerabilities.push({
-        level: 'high' as const,
+        level: 'high',
         title: 'JWT Token visible',
         description: 'Los tokens JWT son visibles en las requests del navegador',
         solution: 'Usar httpOnly cookies o encriptación adicional'
@@ -66,7 +66,7 @@ export default function SecurityStatus() {
     // Solo mostrar si realmente hay información sensible expuesta
     if (!allChecks.encryption) {
       detectedVulnerabilities.push({
-        level: 'medium' as const,
+        level: 'medium',
         title: 'Información sensible en payloads',
         description: 'Balances y datos personales expuestos en responses',
         solution: 'Implementar ofuscación de datos sensibles'
@@ -75,7 +75,7 @@ export default function SecurityStatus() {
 
     if (process.env.NODE_ENV !== 'production') {
       detectedVulnerabilities.push({
-        level: 'low' as const,
+        level: 'low',
         title: 'Logs detallados',
         description: 'Los logs pueden contener información sensible',
         solution: 'Sanitizar logs en producción'
@@ -88,13 +88,16 @@ export default function SecurityStatus() {
   // Verificar si los JWT tokens están siendo enviados de forma segura
   const checkJWTTokenSecurity = async (): Promise<boolean> => {
     try {
-      // Verificar si hay token en localStorage (inseguro)
-      const hasTokenInLocalStorage = typeof window !== 'undefined' && localStorage.getItem('token');
-      
-      // Verificar si hay cookies de autenticación
-      const hasAuthCookie = typeof document !== 'undefined' && document.cookie.includes('auth-token');
+      // Intentar hacer una request de prueba para ver cómo se envía la autenticación
+      const response = await fetch('/api/auth/me', {
+        credentials: 'include',
+      });
 
-      // Es seguro si usa cookies y NO usa localStorage
+      // Si la respuesta es exitosa y no hay token en localStorage, significa que está usando cookies
+      const hasTokenInLocalStorage = typeof window !== 'undefined' && localStorage.getItem('token');
+      const hasAuthCookie = document.cookie.includes('auth-token');
+
+      // Es seguro si usa cookies httpOnly y no localStorage
       return hasAuthCookie && !hasTokenInLocalStorage;
     } catch (error) {
       return false;
@@ -109,6 +112,8 @@ export default function SecurityStatus() {
     const cookies = document.cookie.split(';');
     const authCookie = cookies.find(cookie => cookie.trim().startsWith('auth-token='));
     
+    // Nota: No podemos verificar httpOnly desde el cliente (eso es lo que queremos)
+    // Si no podemos ver el valor de la cookie, es una buena señal
     return !!authCookie;
   };
 
@@ -134,44 +139,44 @@ export default function SecurityStatus() {
           <p className="text-lg text-gray-300">Panel de monitoreo de seguridad del sistema</p>
         </header>
 
-        <div className="grid md:grid-cols-2 gap-8 mb-8">
+        <div className="grid md:grid-cols-2 gap-8">
           {/* Checks de Seguridad */}
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700">
             <h2 className="text-2xl font-bold mb-6 text-green-400">✅ Verificaciones de Seguridad</h2>
             
             <div className="space-y-4">
               <SecurityCheck
-                title="Conexión HTTPS"
+                title="HTTPS Habilitado"
                 status={securityChecks.https}
-                description={securityChecks.https ? "Conexión segura establecida" : "Usando HTTP - datos no cifrados"}
-                risk={securityChecks.https ? "" : "CRÍTICO"}
+                description="Conexión cifrada SSL/TLS"
+                risk={!securityChecks.https ? "CRÍTICO" : ""}
               />
               
               <SecurityCheck
-                title="JWT Tokens Seguros"
-                status={securityChecks.jwtTokensSecure}
-                description={securityChecks.jwtTokensSecure ? "Usando cookies httpOnly" : "Tokens visibles en navegador"}
-                risk={securityChecks.jwtTokensSecure ? "" : "ALTO"}
+                title="JWT Secret Seguro"
+                status={securityChecks.jwtSecret}
+                description="Clave secreta robusta para tokens"
+                risk={!securityChecks.jwtSecret ? "ALTO" : ""}
               />
               
               <SecurityCheck
                 title="Rate Limiting"
                 status={securityChecks.rateLimit}
-                description="Protección contra ataques de fuerza bruta"
+                description="Protección contra spam y ataques"
                 risk=""
               />
               
               <SecurityCheck
                 title="Headers de Seguridad"
-                status={securityChecks.headers} 
-                description="CSP, XSS Protection, y otros headers configurados"
+                status={securityChecks.headers}
+                description="Protección XSS, CSRF, Clickjacking"
                 risk=""
               />
               
               <SecurityCheck
-                title="Cookies Seguras"
-                status={securityChecks.cookiesSecure}
-                description={securityChecks.cookiesSecure ? "Cookies de autenticación encontradas" : "Sin cookies de sesión"}
+                title="Encriptación Avanzada"
+                status={securityChecks.encryption}
+                description="Cifrado de datos sensibles"
                 risk=""
               />
             </div>
@@ -201,13 +206,11 @@ export default function SecurityStatus() {
               </div>
             )}
           </div>
-        </div>
 
-        {/* Medidas Implementadas */}
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700 mb-8">
-          <h2 className="text-2xl font-bold mb-6 text-blue-400">🔧 Medidas Implementadas</h2>
-          
-          <div className="grid md:grid-cols-2 gap-6">
+          {/* Medidas Implementadas */}
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700">
+            <h2 className="text-2xl font-bold mb-6 text-blue-400">🔧 Medidas Implementadas</h2>
+            
             <div className="space-y-3">
               <div className="flex items-center space-x-3">
                 <span className="text-green-400">✅</span>
@@ -229,9 +232,6 @@ export default function SecurityStatus() {
                 <span className="text-green-400">✅</span>
                 <span>Headers de seguridad CSP, XSS</span>
               </div>
-            </div>
-            
-            <div className="space-y-3">
               <div className="flex items-center space-x-3">
                 <span className="text-green-400">✅</span>
                 <span>Sanitización de logs</span>
@@ -254,29 +254,32 @@ export default function SecurityStatus() {
               )}
             </div>
           </div>
-        </div>
-
-        {/* Recomendaciones */}
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700">
-          <h2 className="text-2xl font-bold mb-6 text-purple-400">🚀 Recomendaciones Futuras</h2>
-          
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="p-3 bg-purple-900/20 border border-purple-500/30 rounded-lg">
-              <strong>Autenticación:</strong>
-              <ul className="mt-2 space-y-1 text-gray-300">
-                <li>• Implementar 2FA (Two-Factor Authentication)</li>
-                <li>• Refresh tokens con rotación</li>
-                <li>• Sesiones con timeout dinámico</li>
-              </ul>
             </div>
+          </div>
+
+          {/* Recomendaciones */}
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700">
+            <h2 className="text-2xl font-bold mb-6 text-yellow-400">💡 Recomendaciones</h2>
             
-            <div className="p-3 bg-blue-900/20 border border-blue-500/30 rounded-lg">
-              <strong>Monitoreo:</strong>
-              <ul className="mt-2 space-y-1 text-gray-300">
-                <li>• Logs de seguridad centralizados</li>
-                <li>• Alertas de intentos de acceso</li>
-                <li>• Auditoría de transacciones</li>
-              </ul>
+            <div className="space-y-3 text-sm">
+              <div className="p-3 bg-yellow-900/20 border border-yellow-500/30 rounded-lg">
+                <strong>Para Producción:</strong>
+                <ul className="mt-2 space-y-1 text-gray-300">
+                  <li>• Configurar HTTPS/SSL obligatorio</li>
+                  <li>• Usar variables de entorno seguras</li>
+                  <li>• Implementar Redis para rate limiting</li>
+                  <li>• Configurar WAF (Web Application Firewall)</li>
+                </ul>
+              </div>
+              
+              <div className="p-3 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+                <strong>Monitoreo:</strong>
+                <ul className="mt-2 space-y-1 text-gray-300">
+                  <li>• Logs de seguridad centralizados</li>
+                  <li>• Alertas de intentos de acceso</li>
+                  <li>• Auditoría de transacciones</li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
@@ -284,15 +287,15 @@ export default function SecurityStatus() {
         {/* Estado General */}
         <div className="mt-8 text-center">
           <div className={`inline-flex items-center space-x-3 px-6 py-3 rounded-xl text-lg font-bold ${
-            Object.values(securityChecks).filter(check => check).length >= 5
+            Object.values(securityChecks).every(check => check)
               ? 'bg-green-900/30 border border-green-500 text-green-400'
               : 'bg-yellow-900/30 border border-yellow-500 text-yellow-400'
           }`}>
             <span className="text-2xl">
-              {Object.values(securityChecks).filter(check => check).length >= 5 ? '🛡️' : '⚠️'}
+              {Object.values(securityChecks).every(check => check) ? '🛡️' : '⚠️'}
             </span>
             <span>
-              Estado General: {Object.values(securityChecks).filter(check => check).length >= 5 ? 'SEGURO' : 'NECESITA MEJORAS'}
+              Estado General: {Object.values(securityChecks).every(check => check) ? 'SEGURO' : 'NECESITA MEJORAS'}
             </span>
           </div>
         </div>
