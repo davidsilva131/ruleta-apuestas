@@ -4,7 +4,6 @@ import { executeScheduledGames } from '@/lib/scheduler';
 // POST - Ejecutar inmediatamente todos los juegos pendientes
 export async function POST() {
   try {
-    console.log('🚀 Ejecutando juegos pendientes manualmente...');
     await executeScheduledGames();
     
     return NextResponse.json({ 
@@ -13,7 +12,6 @@ export async function POST() {
     });
     
   } catch (error) {
-    console.error('Error ejecutando juegos pendientes:', error);
     return NextResponse.json({ 
       error: 'Error ejecutando juegos pendientes' 
     }, { status: 500 });
@@ -81,7 +79,6 @@ export async function GET() {
     });
     
   } catch (error) {
-    console.error('Error obteniendo estado de juegos:', error);
     return NextResponse.json({ 
       error: 'Error interno del servidor' 
     }, { status: 500 });
