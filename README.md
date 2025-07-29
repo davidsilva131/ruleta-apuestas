@@ -1,24 +1,70 @@
-# 🎰 Ruleta de Apuestas - Juego de Casino Online
+# 🎰 Ruleta de Apuestas - Sistema de Casino Automático
 
-Una aplicación web interactiva de ruleta con 30 números, cada uno asociado con un animal de la suerte. Construida con Next.js, TypeScript y TailwindCSS.
+Una aplicación web completa de ruleta con 30 números, cada uno asociado con un animal de la suerte. Incluye sistema de juegos automáticos programados, panel de administración y gestión de apuestas físicas. Construida con Next.js, TypeScript y TailwindCSS.
 
-## 🎯 Características
+## 🎯 Características Principales
 
+### 🎮 Sistema de Juego
 - **Ruleta visual animada** con 30 números (1-30)
 - **Animaciones de luces** que simulan el giro de la ruleta
 - **Sistema de apuestas** con saldo virtual inicial de $1000
 - **Animales de la suerte** únicos para cada número
 - **Probabilidades realistas** (20% jugador, 80% casa)
 - **Interfaz responsive** adaptada a todos los dispositivos
-- **Efectos visuales** y sonoros envolventes
+
+### 🤖 Sistema Automático (¡NUEVO!)
+- **Creación automática** de juegos cada hora
+- **Ejecución automática** sin intervención manual
+- **Gestión inteligente** de probabilidades basada en apuestas
+- **Limpieza automática** de datos antiguos
+- **Programación con cron jobs** usando node-cron
+
+### 👨‍💼 Panel de Administración
+- **Control total** del sistema automático
+- **Gestión de juegos** manuales y automáticos
+- **Registro de apuestas físicas** con tickets
+- **Estadísticas en tiempo real**
+- **Control de estado** del scheduler automático
 
 ## 🚀 Tecnologías Utilizadas
 
 - **Next.js 14** (App Router)
 - **TypeScript** para tipado estático
 - **TailwindCSS** para estilos
+- **Prisma** para gestión de base de datos
+- **PostgreSQL** como base de datos principal
+- **node-cron** para programación automática
+- **JWT** para autenticación
 - **React Hooks** para manejo de estado
-- **API Routes** para lógica del servidor
+
+## 🤖 Sistema Automático
+
+### Funcionamiento
+El sistema automático gestiona completamente los juegos de ruleta sin intervención manual:
+
+- **Creación automática**: Nuevos juegos se crean cada hora a los :05 minutos
+- **Ejecución inteligente**: Los juegos se ejecutan automáticamente cada 5 minutos
+- **Gestión de apuestas**: Sistema inteligente que favorece números con menos apuestas
+- **Limpieza automática**: Eliminación de juegos antiguos cada día a las 3 AM
+
+### Configuración de Horarios
+```bash
+# Crear juegos: cada hora a los 5 minutos (10:05, 11:05, 12:05...)
+5 * * * *
+
+# Ejecutar juegos: cada 5 minutos
+*/5 * * * *
+
+# Limpieza: diariamente a las 3 AM
+0 3 * * *
+```
+
+### Control Manual
+Los administradores pueden:
+- ✅ Iniciar/detener el sistema automático
+- 📊 Monitorear el estado en tiempo real
+- 🎯 Ejecutar juegos manualmente si es necesario
+- 📈 Ver estadísticas de rendimiento
 
 ## 📁 Estructura del Proyecto
 
@@ -99,6 +145,31 @@ ruleta-apuestas/
 - `npm run start` - Inicia el servidor de producción
 - `npm run lint` - Ejecuta el linter
 - `npm run type-check` - Verifica los tipos de TypeScript
+- `npm run db:push` - Sincroniza el schema de la base de datos
+- `npm run db:studio` - Abre Prisma Studio para gestión de datos
+
+### Scripts de Sistema Automático
+
+- `./scripts/init-scheduler.sh` - Inicializa el sistema automático
+- `node scripts/test-scheduler.js` - Prueba el funcionamiento del scheduler
+- `node scripts/createAdmin.js` - Crea un usuario administrador
+
+### Inicialización del Sistema Automático
+
+Para inicializar el sistema automático después del despliegue:
+
+```bash
+# Método 1: Script automático
+./scripts/init-scheduler.sh
+
+# Método 2: Manual via API
+curl -X POST http://localhost:3000/api/scheduler \
+  -H "Content-Type: application/json" \
+  -d '{"action":"start"}'
+
+# Método 3: Desde el panel de administración
+# Accede como admin y usa el botón "Iniciar Automático"
+```
 
 ## 🔧 Configuración
 
