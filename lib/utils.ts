@@ -34,11 +34,8 @@ export const getAnimalName = (num: number): string => {
  * @returns Clase CSS de TailwindCSS
  */
 export const getNumberColor = (num: number): string => {
-  const colors = [
-    'bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500',
-    'bg-purple-500', 'bg-pink-500', 'bg-indigo-500', 'bg-orange-500'
-  ];
-  return colors[num % colors.length];
+  // Todos los números tendrán el mismo color de fondo oscuro
+  return 'bg-gray-800';
 };
 
 /**

@@ -20,11 +20,11 @@ const Roulette: React.FC<RouletteProps> = ({ spinning, winningNumber, animal }) 
   useEffect(() => {
     if (spinning) {
       setShowAnimal(false);
-      let currentIndex = 0;
       
       animationRef.current = setInterval(() => {
-        setHighlightedNumber(numbers[currentIndex]);
-        currentIndex = (currentIndex + 1) % numbers.length;
+        // Seleccionar un número aleatorio del 1 al 30
+        const randomNumber = Math.floor(Math.random() * 30) + 1;
+        setHighlightedNumber(randomNumber);
       }, 100); // Cambia cada 100ms
 
       return () => {
@@ -63,9 +63,9 @@ const Roulette: React.FC<RouletteProps> = ({ spinning, winningNumber, animal }) 
             return (
               <div
                 key={num}
-                className={`absolute w-6 h-6 text-xs font-bold rounded-full flex items-center justify-center text-white border-2 border-white/20 transition-all duration-150 ${
+                className={`absolute w-6 h-6 text-xs font-bold rounded-full flex items-center justify-center text-white border-2 border-white/20 transition-all duration-200 ${
                   getNumberColor(num)
-                } ${isHighlighted ? 'scale-125 shadow-lg shadow-white/50 animate-pulse border-white' : ''}`}
+                } ${isHighlighted ? 'scale-150 shadow-2xl shadow-yellow-400 animate-pulse border-yellow-400 bg-yellow-500 text-black ring-4 ring-yellow-300' : ''}`}
                 style={{
                   top: '50%',
                   left: '50%',
