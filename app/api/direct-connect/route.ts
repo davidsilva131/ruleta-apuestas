@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
 
+interface TableRow {
+  table_name: string;
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -47,7 +51,7 @@ export async function POST(request: Request) {
         WHERE table_schema = 'public'
       `);
       
-      const tables = tablesQuery.rows.map(row => row.table_name);
+      const tables = tablesQuery.rows.map((row: TableRow) => row.table_name);
       console.log('Existing tables:', tables);
       
       await client.end();
