@@ -5,6 +5,7 @@
     }
   },
   "env": {
-    "PRISMA_GENERATE_SKIP_AUTOINSTALL": "true"
+    "PRISMA_GENERATE_SKIP_AUTOINSTALL": "true",
+    "DATABASE_URL": "file:/tmp/database.db"
   }
 }
