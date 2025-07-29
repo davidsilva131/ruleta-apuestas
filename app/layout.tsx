@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import '../styles/globals.css';
 import { AuthProvider } from '@/lib/AuthContext';
 import Navbar from '@/components/Navbar';
+import SchedulerInitializer from '@/components/SchedulerInitializer';
 import { Toaster } from 'react-hot-toast';
 
 export const viewport: Viewport = {
@@ -51,6 +52,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased bg-gray-900 text-white">
         <AuthProvider>
+          <SchedulerInitializer />
           <div className="min-h-screen flex flex-col">
             <Navbar />
             <main className="flex-1">

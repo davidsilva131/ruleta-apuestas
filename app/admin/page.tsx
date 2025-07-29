@@ -34,6 +34,7 @@ export default function AdminPanel() {
   const [selectedGame, setSelectedGame] = useState<AutomaticGame | null>(null);
   const [physicalBets, setPhysicalBets] = useState<PhysicalBet[]>([]);
   const [loading, setLoading] = useState(true);
+  const [schedulerStatus, setSchedulerStatus] = useState<{running: boolean, message: string} | null>(null);
   
   // Form states
   const [showCreateGame, setShowCreateGame] = useState(false);
@@ -58,6 +59,7 @@ export default function AdminPanel() {
         return;
       }
       fetchGames();
+      fetchSchedulerStatus();
     }
   }, [user, authLoading, router]);
 
@@ -98,6 +100,43 @@ export default function AdminPanel() {
     } catch (error) {
       console.error('Error fetching physical bets:', error);
       toast.error('Error al cargar las apuestas');
+    }
+  };
+
+  const fetchSchedulerStatus = async () => {
+    try {
+      const response = await fetch('/api/scheduler');
+      if (response.ok) {
+        const status = await response.json();
+        setSchedulerStatus(status);
+      }
+    } catch (error) {
+      console.error('Error fetching scheduler status:', error);
+    }
+  };
+
+  const toggleScheduler = async () => {
+    try {
+      const action = schedulerStatus?.running ? 'stop' : 'start';
+      const response = await fetch('/api/scheduler', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        toast.success(result.message);
+        fetchSchedulerStatus();
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Error controlando el scheduler');
+      }
+    } catch (error) {
+      console.error('Error toggling scheduler:', error);
+      toast.error('Error controlando el scheduler');
     }
   };
 
@@ -237,6 +276,47 @@ export default function AdminPanel() {
           </h1>
           <p className="text-lg text-gray-300">Gestión de juegos automáticos y apuestas físicas</p>
         </header>
+
+        {/* Panel de control del scheduler */}
+        <div className="mb-8">
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold text-white mb-2">🤖 Sistema Automático</h3>
+                <p className="text-gray-300">
+                  {schedulerStatus?.running 
+                    ? '✅ Los juegos se crean y ejecutan automáticamente cada hora' 
+                    : '❌ Sistema automático desactivado - Requiere gestión manual'
+                  }
+                </p>
+              </div>
+              <button
+                onClick={toggleScheduler}
+                className={`px-6 py-3 rounded-lg font-bold transition-all duration-300 ${
+                  schedulerStatus?.running
+                    ? 'bg-red-600 hover:bg-red-500 text-white'
+                    : 'bg-green-600 hover:bg-green-500 text-white'
+                }`}
+              >
+                {schedulerStatus?.running ? '🛑 Detener' : '▶️ Iniciar'} Automático
+              </button>
+            </div>
+            {schedulerStatus && (
+              <div className="mt-4 p-4 bg-gray-700/50 rounded-lg">
+                <p className="text-sm text-gray-300">
+                  <strong>Estado:</strong> {schedulerStatus.message}
+                </p>
+                {schedulerStatus.running && (
+                  <div className="mt-2 text-sm text-gray-400">
+                    <p>• Próximos juegos se crean automáticamente cada hora</p>
+                    <p>• Los juegos se ejecutan automáticamente cuando llega su hora</p>
+                    <p>• Limpieza automática de juegos antiguos</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Panel izquierdo - Lista de juegos */}
