@@ -1,0 +1,108 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  balance   Float    @default(0)
+  isAdmin   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessions    Session[]
+  gameStats   GameStats?
+  bets        Bet[]
+  physicalBets PhysicalBet[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model GameStats {
+  id          String @id @default(cuid())
+  userId      String @unique
+  totalGames  Int    @default(0)
+  totalWins   Int    @default(0)
+  totalLosses Int    @default(0)
+  totalWagered Float  @default(0)
+  totalWon    Float  @default(0)
+  bestWin     Float  @default(0)
+  currentStreak Int   @default(0)
+  bestStreak  Int    @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("game_stats")
+}
+
+model Bet {
+  id           String   @id @default(cuid())
+  userId       String
+  gameType     String   // "manual" | "automatic"
+  chosenNumber Int
+  betAmount    Float
+  winningNumber Int?
+  won          Boolean?
+  payout       Float    @default(0)
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("bets")
+}
+
+model AutomaticGame {
+  id           String   @id @default(cuid())
+  scheduledFor DateTime
+  status       String   @default("pending") // "pending" | "running" | "completed"
+  winningNumber Int?
+  totalBets    Int      @default(0)
+  totalAmount  Float    @default(0)
+  createdAt    DateTime @default(now())
+  completedAt  DateTime?
+
+  physicalBets PhysicalBet[]
+
+  @@map("automatic_games")
+}
+
+model PhysicalBet {
+  id             String  @id @default(cuid())
+  gameId         String
+  userId         String?
+  customerName   String  // Nombre del cliente físico
+  customerPhone  String?
+  chosenNumber   Int
+  betAmount      Float
+  ticketNumber   String  @unique // Número de ticket físico
+  won            Boolean @default(false)
+  payout         Float   @default(0)
+  createdAt      DateTime @default(now())
+
+  game AutomaticGame @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  user User?         @relation(fields: [userId], references: [id])
+
+  @@map("physical_bets")
+}
