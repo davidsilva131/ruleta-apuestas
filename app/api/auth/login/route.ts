@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { comparePassword, generateToken } from '@/lib/auth';
+import { comparePassword, generateToken, getSecureCookieConfig } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
   try {
@@ -58,11 +58,18 @@ export async function POST(req: NextRequest) {
     // Remover contraseña de la respuesta
     const { password: _, ...userWithoutPassword } = user;
 
-    return NextResponse.json({
+    // Crear respuesta con cookie httpOnly
+    const response = NextResponse.json({
       message: 'Login exitoso',
-      token,
-      user: userWithoutPassword
+      user: userWithoutPassword,
+      // NO enviamos el token en el response para mayor seguridad
     });
+
+    // Configurar cookie httpOnly segura
+    const cookieConfig = getSecureCookieConfig();
+    response.cookies.set('auth-token', token, cookieConfig);
+
+    return response;
 
   } catch (error) {
     console.error('Error logging in user:', error);

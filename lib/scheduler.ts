@@ -85,7 +85,6 @@ export async function createAutomaticGame() {
     });
 
     if (existingGame) {
-      console.log(`Juego ya existe para ${nextHour.toLocaleString('es-ES')}`);
       return existingGame;
     }
 
@@ -96,10 +95,8 @@ export async function createAutomaticGame() {
       },
     });
 
-    console.log(`✅ Juego automático creado para ${nextHour.toLocaleString('es-ES')}`);
     return newGame;
   } catch (error) {
-    console.error('❌ Error creando juego automático:', error);
     throw error;
   }
 }
@@ -124,16 +121,11 @@ export async function executeScheduledGames() {
 
     for (const game of gamesToExecute) {
       try {
-        console.log(`🎯 Ejecutando juego ${game.id.slice(-8)} programado para ${game.scheduledFor.toLocaleString('es-ES')}`);
-        console.log(`📊 Apuestas totales: ${game.physicalBets.length}`);
-        
         // Calcular probabilidades (la casa siempre debe ganar)
         const probabilities = calculateProbabilities(game.physicalBets);
         
         // Seleccionar número ganador
         const winningNumber = selectWinningNumber(probabilities);
-        
-        console.log(`🎲 Número ganador seleccionado: ${winningNumber}`);
         
         // Actualizar apuestas ganadoras si las hay
         if (game.physicalBets.length > 0) {
@@ -158,19 +150,13 @@ export async function executeScheduledGames() {
             completedAt: now,
           },
         });
-
-        console.log(`✅ Juego ${game.id.slice(-8)} completado. Número ganador: ${winningNumber}`);
-        
-        // Mostrar estadísticas de ganadores
-        const winners = game.physicalBets.filter(bet => bet.chosenNumber === winningNumber);
-        console.log(`🏆 Ganadores: ${winners.length} de ${game.physicalBets.length} apostadores`);
         
       } catch (error) {
-        console.error(`❌ Error ejecutando juego ${game.id}:`, error);
+        // Silently handle individual game execution errors
       }
     }
   } catch (error) {
-    console.error('❌ Error ejecutando juegos programados:', error);
+    // Silently handle execution errors
   }
 }
 
@@ -188,22 +174,15 @@ export async function cleanupOldGames() {
         status: 'completed',
       },
     });
-
-    if (deletedCount.count > 0) {
-      console.log(`🧹 Limpieza: ${deletedCount.count} juegos antiguos eliminados`);
-    }
   } catch (error) {
-    console.error('❌ Error en limpieza de juegos:', error);
+    // Silently handle cleanup errors
   }
 }
 
 // Función para inicializar el programador
 export function initializeScheduler() {
-  console.log('🚀 Iniciando programador automático de ruleta...');
-
   // Crear juego cada hora en punto (ej: 10:00, 11:00, 12:00)
   cron.schedule('0 * * * *', async () => {
-    console.log('⏰ Creando nuevo juego automático...');
     await createAutomaticGame();
   }, {
     timezone: "America/Bogota" // Ajusta según tu zona horaria
@@ -216,7 +195,6 @@ export function initializeScheduler() {
 
   // Limpieza de juegos antiguos cada día a las 3 AM
   cron.schedule('0 3 * * *', async () => {
-    console.log('🧹 Iniciando limpieza de juegos antiguos...');
     await cleanupOldGames();
   }, {
     timezone: "America/Bogota"
@@ -240,22 +218,16 @@ export function initializeScheduler() {
       });
 
       if (!existingGame) {
-        console.log('🎮 Creando juego inicial...');
         await createAutomaticGame();
       }
       
       // También ejecutar juegos pendientes al iniciar
-      console.log('🔍 Verificando juegos pendientes al iniciar...');
       await executeScheduledGames();
       
     } catch (error) {
-      console.error('❌ Error creando juego inicial:', error);
+      // Silently handle initialization errors
     }
   }, 2000);
-
-  console.log('✅ Programador automático iniciado exitosamente');
-  console.log('📅 Próximos juegos se crearán automáticamente cada hora en punto');
-  console.log('🎯 Los juegos se ejecutarán automáticamente en su hora programada');
 }
 
 // Función para detener el programador
@@ -263,5 +235,4 @@ export function stopScheduler() {
   cron.getTasks().forEach((task) => {
     task.stop();
   });
-  console.log('🛑 Programador automático detenido');
 }

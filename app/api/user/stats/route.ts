@@ -1,18 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { verifyToken } from '@/lib/auth';
+import { getTokenFromRequest, verifyToken } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
 export async function GET(request: NextRequest) {
   try {
-    // Verificar el token JWT
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    // Verificar el token JWT usando cookies httpOnly
+    const token = getTokenFromRequest(request);
+    if (!token) {
       return NextResponse.json({ error: 'Token de autorización requerido' }, { status: 401 });
     }
-
-    const token = authHeader.substring(7);
     
     const decoded = verifyToken(token);
     if (!decoded) {
