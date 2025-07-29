@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import '../styles/globals.css';
 import { AuthProvider } from '@/lib/AuthContext';
+import { ThemeProvider } from '@/lib/ThemeContext';
 import Navbar from '@/components/Navbar';
 import SchedulerInitializer from '@/components/SchedulerInitializer';
 import { Toaster } from 'react-hot-toast';
@@ -50,39 +51,45 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="antialiased bg-gray-900 text-white">
-        <AuthProvider>
-          <SchedulerInitializer />
-          <div className="min-h-screen flex flex-col">
-            <Navbar />
-            <main className="flex-1">
-              {children}
-            </main>
-          </div>
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              duration: 4000,
-              style: {
-                background: '#374151',
-                color: '#fff',
-                border: '1px solid #4B5563',
-              },
-              success: {
-                iconTheme: {
-                  primary: '#10B981',
-                  secondary: '#fff',
+      <body className="antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors">
+        <ThemeProvider>
+          <AuthProvider>
+            <SchedulerInitializer />
+            <div className="min-h-screen flex flex-col">
+              <Navbar />
+              <main className="flex-1">
+                {children}
+              </main>
+            </div>
+            <Toaster
+              position="bottom-left"
+              toastOptions={{
+                duration: 4000,
+                style: {
+                  background: 'var(--toast-bg)',
+                  color: 'var(--toast-text)',
+                  border: '1px solid var(--toast-border)',
+                  fontSize: '16px',
+                  padding: '16px 20px',
+                  minWidth: '350px',
+                  borderRadius: '8px',
                 },
-              },
-              error: {
-                iconTheme: {
-                  primary: '#EF4444',
-                  secondary: '#fff',
+                success: {
+                  iconTheme: {
+                    primary: '#10B981',
+                    secondary: '#fff',
+                  },
                 },
-              },
-            }}
-          />
-        </AuthProvider>
+                error: {
+                  iconTheme: {
+                    primary: '#EF4444',
+                    secondary: '#fff',
+                  },
+                },
+              }}
+            />
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -65,13 +65,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Lógica de probabilidad: 80% casa gana, 20% jugador gana
+    // Lógica de probabilidad: 98% casa gana, 2% jugador gana
     let winningNumber: number;
     const roll = Math.random();
     
-    if (roll < 0.2) { // 20% probabilidad de que el jugador acierte
+    if (roll < 0.02) { // 2% probabilidad de que el jugador acierte
       winningNumber = chosen;
-    } else { // 80% probabilidad de que sea cualquier otro número
+    } else { // 98% probabilidad de que sea cualquier otro número
       do {
         winningNumber = Math.floor(Math.random() * 30) + 1;
       } while (winningNumber === chosen);
