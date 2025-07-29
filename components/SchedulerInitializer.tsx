@@ -13,25 +13,16 @@ export default function SchedulerInitializer() {
         
         if (!status.running) {
           // Iniciar el scheduler si no está corriendo
-          const startResponse = await fetch('/api/scheduler', {
+          await fetch('/api/scheduler', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({ action: 'start' }),
           });
-          
-          if (startResponse.ok) {
-            const result = await startResponse.json();
-            console.log('✅ Scheduler automático iniciado:', result.message);
-          } else {
-            console.error('❌ Error iniciando scheduler');
-          }
-        } else {
-          console.log('✅ Scheduler ya está ejecutándose');
         }
       } catch (error) {
-        console.error('❌ Error verificando/iniciando scheduler:', error);
+        // Silently handle initialization errors
       }
     };
 
