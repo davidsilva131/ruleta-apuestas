@@ -51,16 +51,8 @@ export default function Home() {
     
     setLoadingStats(true);
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.log('No token found');
-        return;
-      }
-
       const response = await fetch('/api/user/stats', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include', // Usar cookies httpOnly
       });
 
       if (response.ok) {
@@ -127,13 +119,12 @@ export default function Home() {
     setAnimal(null);
 
     try {
-      const token = localStorage.getItem('token');
       const res = await fetch('/api/spin', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
+        credentials: 'include', // Usar cookies httpOnly
         body: JSON.stringify({ 
           chosen: chosenNumber, 
           bet: betAmount 

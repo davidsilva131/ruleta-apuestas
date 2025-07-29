@@ -1,5 +1,5 @@
 'use client'
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 interface User {
   id: string;
@@ -13,7 +13,7 @@ interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
   register: (email: string, username: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
   loading: boolean;
   updateBalance: (newBalance: number) => void;
 }
@@ -28,46 +28,29 @@ export const useAuth = () => {
   return context;
 };
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Agregar un mecanismo de limpieza por si hay tokens corruptos
-    const token = localStorage.getItem('token');
-    console.log('Token encontrado:', !!token);
-    
-    if (token) {
-      // Verificar que el token tenga un formato válido antes de usarlo
-      try {
-        const parts = token.split('.');
-        if (parts.length === 3) {
-          fetchUser(token);
-        } else {
-          console.log('Token inválido, limpiando localStorage');
-          localStorage.removeItem('token');
-          setLoading(false);
-        }
-      } catch (error) {
-        console.log('Error validating token, limpiando localStorage');
-        localStorage.removeItem('token');
-        setLoading(false);
-      }
-    } else {
-      setLoading(false);
-    }
+    // Al cargar la página, verificar si hay una sesión activa
+    // ya no necesitamos verificar localStorage
+    fetchUser();
   }, []);
 
-  const fetchUser = async (token: string) => {
-    console.log('Fetching user with token...');
+  const fetchUser = async () => {
+    console.log('Verificando sesión...');
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos timeout
       
+      // Ahora enviamos cookies automáticamente, no necesitamos Authorization header
       const response = await fetch('/api/auth/me', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include', // Importante: incluir cookies en la request
         signal: controller.signal
       });
 
@@ -79,12 +62,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('User data received:', userData);
         setUser(userData);
       } else {
-        console.log('Error response, removing token');
-        localStorage.removeItem('token');
+        console.log('No sesión activa encontrada');
+        setUser(null);
       }
     } catch (error) {
       console.error('Error fetching user:', error);
-      localStorage.removeItem('token');
+      setUser(null);
       // Si es un error de timeout o de red, aún así permitir continuar
       if (error instanceof Error && error.name === 'AbortError') {
         console.log('Request timed out');
@@ -101,12 +84,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Importante: incluir cookies
         body: JSON.stringify({ email, password }),
       });
 
       if (response.ok) {
-        const { token, user: userData } = await response.json();
-        localStorage.setItem('token', token);
+        const { user: userData } = await response.json();
+        // Ya no manejamos el token manualmente, las cookies lo hacen
         setUser(userData);
         return true;
       }
@@ -124,12 +108,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Importante: incluir cookies
         body: JSON.stringify({ email, username, password }),
       });
 
       if (response.ok) {
-        const { token, user: userData } = await response.json();
-        localStorage.setItem('token', token);
+        const { user: userData } = await response.json();
+        // Ya no manejamos el token manualmente, las cookies lo hacen
         setUser(userData);
         return true;
       }
@@ -140,11 +125,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
-    // Redirigir a la página principal pública
-    window.location.href = '/';
+  const logout = async () => {
+    try {
+      // Llamar al endpoint de logout para limpiar la sesión del servidor
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include', // Importante: incluir cookies
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      // Limpiar estado local
+      setUser(null);
+      // Redirigir a la página principal pública
+      window.location.href = '/';
+    }
   };
 
   const updateBalance = (newBalance: number) => {
