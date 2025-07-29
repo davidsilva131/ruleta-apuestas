@@ -168,10 +168,11 @@ export default function AutomaticRoulette() {
               <div className="mt-6 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
                 <h3 className="font-semibold text-blue-400 mb-2">ℹ️ Información:</h3>
                 <ul className="text-sm text-gray-300 space-y-1">
-                  <li>• Los juegos se ejecutan automáticamente cada hora</li>
+                  <li>• Los juegos se crean y ejecutan automáticamente cada hora</li>
                   <li>• Las apuestas son realizadas en el punto físico</li>
                   <li>• El sistema favorece a los números con menos apuestas</li>
                   <li>• Pago: 30:1 para aciertos</li>
+                  <li>• Sistema completamente automatizado - Sin intervención manual</li>
                 </ul>
               </div>
             </div>
