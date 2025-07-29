@@ -43,11 +43,8 @@ export default function AutomaticRoulette() {
 
   const fetchGames = async () => {
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch('/api/automatic-games', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include', // Usar cookies httpOnly
       });
 
       if (response.ok) {
