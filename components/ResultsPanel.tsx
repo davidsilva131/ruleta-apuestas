@@ -21,11 +21,11 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
 
   if (!winningNumber) {
     return (
-      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700 shadow-2xl min-h-[600px] flex flex-col">
-        <h2 className="text-2xl font-bold text-center mb-6 text-purple-400">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-300 dark:border-gray-700 shadow-md min-h-[600px] flex flex-col">
+        <h2 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">
           📊 Resultados
         </h2>
-        <div className="text-center text-gray-400 flex-1 flex flex-col justify-center">
+        <div className="text-center text-gray-600 dark:text-gray-400 flex-1 flex flex-col justify-center">
           <div className="text-6xl mb-4">🎲</div>
           <p className="text-lg">¡Haz tu apuesta y gira la ruleta!</p>
           <p className="text-sm mt-2 opacity-75">Los resultados aparecerán aquí</p>
@@ -38,8 +38,8 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
   const winnings = isWin ? betAmount * 29 : 0;
 
   return (
-    <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 border border-gray-700 shadow-2xl min-h-[500px] flex flex-col">
-      <h2 className="text-xl font-bold text-center mb-4 text-purple-400">
+    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-300 dark:border-gray-700 shadow-md min-h-[500px] flex flex-col">
+      <h2 className="text-xl font-bold text-center mb-4 text-gray-900 dark:text-white">
         📊 Resultados
       </h2>
 
@@ -47,44 +47,48 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
         {!winningNumber ? (
           <div className="text-center py-8">
             <div className="text-6xl mb-4">🎲</div>
-            <p className="text-lg text-gray-300 mb-2">¡Haz tu apuesta y gira la ruleta!</p>
-            <p className="text-sm text-gray-400">Los resultados aparecerán aquí</p>
+            <p className="text-lg text-gray-600 dark:text-gray-300 mb-2">¡Haz tu apuesta y gira la ruleta!</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Los resultados aparecerán aquí</p>
           </div>
         ) : (
           <>
             {/* Número ganador */}
-            <div className="text-center mb-4">
+            <div className="text-center mb-6">
               <div className="relative inline-block">
                 <div className={`text-5xl font-bold rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-2 border-4 ${
-                  isWin ? 'bg-green-500 border-green-300 shadow-lg shadow-green-500/50 animate-pulse' : 'bg-red-500 border-red-300 shadow-lg shadow-red-500/50'
+                  isWin 
+                    ? 'bg-green-500 border-green-400 text-white shadow-lg' 
+                    : 'bg-red-500 border-red-400 text-white shadow-lg'
                 }`}>
                   {winningNumber}
                 </div>
-                <div className="absolute -top-1 -right-1 text-2xl animate-bounce">
+                <div className="absolute -top-1 -right-1 text-2xl">
                   {getAnimalEmoji(winningNumber)}
                 </div>
               </div>
-              <p className="text-lg font-semibold text-yellow-400 mb-1">
+              <p className="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-1">
                 Número ganador: {winningNumber}
               </p>
-              <p className="text-sm text-gray-300">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Animal: {getAnimalEmoji(winningNumber)} {getAnimalName(winningNumber)}
               </p>
             </div>
 
             {/* Resultado */}
-            <div className={`text-center mb-4 p-3 rounded-xl border-2 ${
+            <div className={`text-center mb-6 p-4 rounded-lg border-2 ${
               isWin 
-                ? 'bg-green-900/30 border-green-500 shadow-lg shadow-green-500/20' 
-                : 'bg-red-900/30 border-red-500 shadow-lg shadow-red-500/20'
+                ? 'bg-green-50 dark:bg-green-900/30 border-green-300 dark:border-green-500' 
+                : 'bg-red-50 dark:bg-red-900/30 border-red-300 dark:border-red-500'
             }`}>
-              <div className={`text-4xl mb-2 ${isWin ? 'animate-bounce' : 'animate-pulse'}`}>
+              <div className="text-4xl mb-2">
                 {isWin ? '🎉' : '😔'}
               </div>
-              <h3 className={`text-xl font-bold mb-1 ${isWin ? 'text-green-400' : 'text-red-400'}`}>
+              <h3 className={`text-xl font-bold mb-1 ${
+                isWin ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+              }`}>
                 {isWin ? '¡GANASTE!' : 'PERDISTE'}
               </h3>
-              <p className="text-sm text-gray-300">
+              <p className="text-sm text-gray-700 dark:text-gray-300">
                 {isWin 
                   ? `¡Felicidades! Acertaste el número ${winningNumber}` 
                   : `El número ganador fue ${winningNumber}, apostaste al ${chosenNumber}`
@@ -93,24 +97,28 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
             </div>
 
             {/* Detalles de la apuesta */}
-            <div className="bg-gray-700/50 rounded-lg p-3 mb-4 space-y-1">
-              <h4 className="font-semibold text-yellow-400 mb-2 text-sm">Detalles de la apuesta:</h4>
-              <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-4 mb-6 space-y-1">
+              <h4 className="font-semibold text-gray-900 dark:text-white mb-3 text-base">
+                Detalles de la apuesta:
+              </h4>
+              <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
-                  <p className="text-gray-400">Tu número:</p>
-                  <p className="text-white font-bold">{chosenNumber}</p>
+                  <p className="text-gray-600 dark:text-gray-400">Tu número:</p>
+                  <p className="text-gray-900 dark:text-white font-bold text-lg">{chosenNumber}</p>
                 </div>
                 <div>
-                  <p className="text-gray-400">Número ganador:</p>
-                  <p className="text-yellow-400 font-bold">{winningNumber}</p>
+                  <p className="text-gray-600 dark:text-gray-400">Número ganador:</p>
+                  <p className="text-blue-600 dark:text-blue-400 font-bold text-lg">{winningNumber}</p>
                 </div>
                 <div>
-                  <p className="text-gray-400">Apuesta:</p>
-                  <p className="text-blue-400 font-bold">{formatCurrency(betAmount)}</p>
+                  <p className="text-gray-600 dark:text-gray-400">Apuesta:</p>
+                  <p className="text-gray-900 dark:text-white font-bold">{formatCurrency(betAmount)}</p>
                 </div>
                 <div>
-                  <p className="text-gray-400">Resultado:</p>
-                  <p className={`font-bold ${isWin ? 'text-green-400' : 'text-red-400'}`}>
+                  <p className="text-gray-600 dark:text-gray-400">Resultado:</p>
+                  <p className={`font-bold ${
+                    isWin ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                  }`}>
                     {isWin ? `+${formatCurrency(winnings)}` : `-${formatCurrency(betAmount)}`}
                   </p>
                 </div>
@@ -124,13 +132,13 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
           <div className="mt-auto">
             <button
               onClick={onReset}
-              className="w-full h-10 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold rounded-xl hover:from-blue-400 hover:to-purple-400 transition-all duration-300 hover:scale-105 shadow-lg shadow-blue-500/30 text-sm"
+              className="w-full h-12 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-md focus:outline-none focus:ring-4 focus:ring-blue-300"
             >
               🎰 Nueva Partida
             </button>
 
             {/* Mensaje motivacional */}
-            <div className="mt-2 text-center text-xs text-gray-400">
+            <div className="mt-3 text-center text-sm text-gray-600 dark:text-gray-400">
               {isWin ? (
                 <p>🌟 ¡Increíble suerte! ¿Intentas otra vez?</p>
               ) : (

@@ -187,16 +187,16 @@ export default function Home() {
   // Mostrar loading mientras se autentica
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-yellow-400 mx-auto"></div>
-          <p className="text-white text-xl mt-4">Cargando...</p>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="text-gray-900 dark:text-white text-xl mt-4">Cargando...</p>
           <button 
             onClick={() => {
               localStorage.clear();
               window.location.reload();
             }}
-            className="mt-4 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-sm transition-colors"
+            className="mt-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-red-500"
           >
             Limpiar cache y recargar
           </button>
@@ -206,33 +206,27 @@ export default function Home() {
   }
 
   return (
-    <div className="h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white relative overflow-hidden flex flex-col">
-      {/* Efectos de fondo */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none">
-        <div className="absolute top-10 left-10 w-32 h-32 bg-yellow-400 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-24 h-24 bg-pink-400 rounded-full blur-2xl animate-pulse delay-1000"></div>
-        <div className="absolute bottom-20 left-1/4 w-40 h-40 bg-blue-400 rounded-full blur-3xl animate-pulse delay-2000"></div>
-        <div className="absolute bottom-40 right-1/3 w-28 h-28 bg-green-400 rounded-full blur-2xl animate-pulse delay-3000"></div>
-      </div>
-
-      <div className="container mx-auto px-4 py-4 relative z-10 overflow-x-hidden flex-1 flex flex-col">
+    <div className="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white transition-colors relative flex flex-col min-h-full">
+      <div className="container mx-auto px-4 py-2 relative z-10 flex-1 flex flex-col max-w-7xl">
         {/* Header para usuarios autenticados normales */}
         {user && !user.isAdmin && (
-          <div className="text-center mb-4 flex-shrink-0">
-            <h1 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-red-500 mb-2">
-              🎯 RULETA MANUAL
+          <div className="text-center mb-4 flex-shrink-0 bg-white dark:bg-gray-800 rounded-lg p-4 shadow-md border border-gray-300 dark:border-gray-700">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              🎯 Ruleta Manual
             </h1>
-            <p className="text-base text-gray-300 mb-4">¡Elige tu número de la suerte del 1 al 30!</p>
+            <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">¡Elige tu número de la suerte del 1 al 30!</p>
             
             {/* Barra con saldo y estadísticas */}
-            <div className="flex justify-center items-center gap-4">
-              <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg px-4 py-2 border border-gray-700">
-                <span className="text-green-400 text-xl font-bold">Saldo: ${user.balance.toLocaleString()}</span>
+            <div className="flex justify-center items-center gap-3 flex-wrap">
+              <div className="bg-gray-100 dark:bg-gray-700 rounded-lg px-4 py-2 border border-gray-300 dark:border-gray-600">
+                <span className="text-green-600 dark:text-green-400 text-lg font-bold">
+                  Saldo: ${user.balance.toLocaleString()}
+                </span>
               </div>
               <button
                 onClick={handleOpenStatsModal}
                 disabled={loadingStats}
-                className="bg-purple-600 hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 hover:scale-105 shadow-lg"
+                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 shadow-md focus:outline-none focus:ring-4 focus:ring-blue-300 text-sm"
               >
                 {loadingStats ? (
                   <span className="flex items-center gap-2">
@@ -249,35 +243,35 @@ export default function Home() {
 
         {!user ? (
           // Vista para usuarios no autenticados
-          <div className="text-center py-16">
+          <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-300 dark:border-gray-700">
             <div className="text-8xl mb-6">🎰</div>
-            <h2 className="text-3xl font-bold mb-4">¡Bienvenido al Casino!</h2>
-            <p className="text-xl text-gray-300 mb-8">Inicia sesión para comenzar a jugar</p>
+            <h2 className="text-3xl font-bold mb-4 text-gray-900 dark:text-white">¡Bienvenido al Casino!</h2>
+            <p className="text-xl text-gray-700 dark:text-gray-300 mb-8">Inicia sesión para comenzar a jugar</p>
             <button
               onClick={() => setShowLoginModal(true)}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-4 px-8 rounded-xl text-xl transition-all duration-300 hover:scale-105 shadow-lg"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-lg text-xl transition-colors duration-200 shadow-md focus:outline-none focus:ring-4 focus:ring-blue-300"
             >
-              🚀 Iniciar Sesión
+              Iniciar Sesión
             </button>
-            <div className="mt-8 p-4 bg-green-900/20 border border-green-500/30 rounded-lg max-w-md mx-auto">
-              <p className="text-green-400">
+            <div className="mt-8 p-4 bg-green-50 dark:bg-green-900/20 border border-green-300 dark:border-green-500/30 rounded-lg max-w-md mx-auto">
+              <p className="text-green-700 dark:text-green-400">
                 🎁 Al registrarte recibes <strong>$1,000 gratis</strong> para empezar a jugar
               </p>
             </div>
           </div>
         ) : user.isAdmin ? (
           // Vista para administradores (no pueden jugar)
-          <div className="text-center py-16">
+          <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-300 dark:border-gray-700">
             <div className="text-8xl mb-6">👑</div>
-            <h2 className="text-3xl font-bold mb-4 text-red-400">Panel de Administrador</h2>
-            <p className="text-xl text-gray-300 mb-8">Los administradores no pueden participar en los juegos</p>
+            <h2 className="text-3xl font-bold mb-4 text-red-600 dark:text-red-400">Panel de Administrador</h2>
+            <p className="text-xl text-gray-700 dark:text-gray-300 mb-8">Los administradores no pueden participar en los juegos</p>
             <div className="space-y-4">
-              <p className="text-lg text-gray-400">Accede a las siguientes secciones:</p>
-              <div className="flex justify-center space-x-4">
-                <a href="/admin" className="bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg">
+              <p className="text-lg text-gray-600 dark:text-gray-400">Accede a las siguientes secciones:</p>
+              <div className="flex justify-center space-x-4 flex-wrap gap-4">
+                <a href="/admin" className="bg-gray-800 hover:bg-gray-900 dark:bg-gray-700 dark:hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 shadow-md focus:outline-none focus:ring-4 focus:ring-gray-400">
                   ⚙️ Panel de Admin
                 </a>
-                <a href="/security" className="bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg">
+                <a href="/security" className="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 shadow-md focus:outline-none focus:ring-4 focus:ring-red-300">
                   🛡️ Seguridad
                 </a>
               </div>
@@ -285,25 +279,26 @@ export default function Home() {
           </div>
         ) : (
           // Vista para usuarios autenticados normales
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 max-w-7xl mx-auto items-start flex-1 min-h-0">
-            {/* Panel de Apuestas */}
-            <div className="lg:col-span-1 min-w-0">
-              <BettingPanel
-                chosenNumber={chosenNumber}
-                setChosenNumber={setChosenNumber}
-                betAmount={betAmount}
-                setBetAmount={setBetAmount}
-                onSpin={spin}
-                spinning={spinning}
-                balance={user?.balance || 0}
-              />
-            </div>
+          <div className="flex-1 flex flex-col">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start flex-1">
+              {/* Panel de Apuestas */}
+              <div className="lg:col-span-1 min-w-0">
+                <BettingPanel
+                  chosenNumber={chosenNumber}
+                  setChosenNumber={setChosenNumber}
+                  betAmount={betAmount}
+                  setBetAmount={setBetAmount}
+                  onSpin={spin}
+                  spinning={spinning}
+                  balance={user?.balance || 0}
+                />
+              </div>
 
-            {/* Ruleta */}
-            <div className="lg:col-span-1 flex justify-center items-start pt-4 min-w-0 sticky top-4">
-              <Roulette
-                spinning={spinning}
-                winningNumber={winningNumber}
+              {/* Ruleta */}
+              <div className="lg:col-span-1 flex justify-center items-start pt-20 min-w-0">
+                <Roulette
+                  spinning={spinning}
+                  winningNumber={winningNumber}
                 animal={animal}
               />
             </div>
@@ -320,13 +315,14 @@ export default function Home() {
               />
             </div>
           </div>
-        )}
 
-        {/* Información adicional */}
-        <footer className="text-center mt-2 text-gray-400 text-xs flex-shrink-0">
-          <p>🍀 ¡Que la suerte esté de tu lado! • Juega responsablemente</p>
-          <p className="mt-1">Probabilidad de ganar: 3.33% (1/30) • Pago: 30:1</p>
-        </footer>
+            {/* Información adicional */}
+            <footer className="text-center mt-4 text-gray-600 dark:text-gray-400 text-xs flex-shrink-0 py-2">
+              <p>🍀 ¡Que la suerte esté de tu lado! • Juega responsablemente</p>
+              <p className="mt-1">Probabilidad de ganar: 2% • Pago: 30:1</p>
+            </footer>
+          </div>
+        )}
       </div>
 
       {/* Componentes modales y de audio */}
