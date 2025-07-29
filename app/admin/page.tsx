@@ -65,11 +65,8 @@ export default function AdminPanel() {
 
   const fetchGames = async () => {
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch('/api/automatic-games', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include', // Usar cookies httpOnly
       });
 
       if (response.ok) {
@@ -86,11 +83,8 @@ export default function AdminPanel() {
 
   const fetchPhysicalBets = async (gameId: string) => {
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch(`/api/physical-bets?gameId=${gameId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include', // Usar cookies httpOnly
       });
 
       if (response.ok) {
@@ -147,13 +141,12 @@ export default function AdminPanel() {
     }
 
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch('/api/create-game', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
+        credentials: 'include', // Usar cookies httpOnly
         body: JSON.stringify({
           scheduledFor: newGameDate,
         }),
@@ -182,13 +175,12 @@ export default function AdminPanel() {
     }
 
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch('/api/physical-bets', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
+        credentials: 'include', // Usar cookies httpOnly
         body: JSON.stringify({
           gameId: selectedGame.id,
           ...newBetForm,
@@ -219,13 +211,12 @@ export default function AdminPanel() {
 
   const executeGame = async (gameId: string) => {
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch('/api/automatic-games', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
+        credentials: 'include', // Usar cookies httpOnly
         body: JSON.stringify({ gameId }),
       });
 

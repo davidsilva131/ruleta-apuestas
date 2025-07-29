@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { hashPassword, generateToken } from '@/lib/auth';
+import { hashPassword, generateToken, getSecureCookieConfig } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
   try {
@@ -77,11 +77,18 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    return NextResponse.json({
+    // Crear respuesta con cookie httpOnly
+    const response = NextResponse.json({
       message: 'Usuario creado exitosamente',
-      token,
       user
+      // NO enviamos el token en el response para mayor seguridad
     });
+
+    // Configurar cookie httpOnly segura
+    const cookieConfig = getSecureCookieConfig();
+    response.cookies.set('auth-token', token, cookieConfig);
+
+    return response;
 
   } catch (error) {
     console.error('Error registering user:', error);

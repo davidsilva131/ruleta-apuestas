@@ -43,3 +43,13 @@ next-env.d.ts
 admin-credentials.txt
 *.env
 .env*
+
+# cookies and session files
+cookies.txt
+*.cookies
+session-*.txt
+auth-*.txt
+
+# testing and debugging files
+*.log
+debug-*.json

@@ -21,7 +21,7 @@ export default function SecurityStatus() {
   }, []);
 
   const checkSecurityStatus = async () => {
-    // Verificaciones básicas del cliente
+    // Verificaciones básicas
     const basicChecks = {
       https: window.location.protocol === 'https:',
       jwtSecret: process.env.NODE_ENV === 'production',
@@ -30,34 +30,9 @@ export default function SecurityStatus() {
       encryption: true,
     };
 
-    // Obtener información de seguridad desde el servidor
-    let serverSecurityInfo = null;
-    try {
-      const response = await fetch('/api/security-status', {
-        credentials: 'include',
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        serverSecurityInfo = data.security;
-        console.log('🔒 Server Security Info:', serverSecurityInfo);
-      } else {
-        console.log('❌ Failed to fetch security info:', response.status);
-      }
-    } catch (error) {
-      console.error('❌ Error fetching server security info:', error);
-    }
-
-    // Verificar configuraciones locales
-    const jwtTokensSecure = serverSecurityInfo?.jwtTokensSecure || await checkJWTTokenSecurity();
-    const cookiesSecure = serverSecurityInfo?.cookiesConfigured || checkCookieSecurity();
-
-    console.log('🔒 Security Status:', {
-      serverInfo: serverSecurityInfo,
-      jwtTokensSecure,
-      cookiesSecure,
-      hasLocalStorageToken: !!localStorage.getItem('token')
-    });
+    // Verificar si se están usando cookies httpOnly
+    const jwtTokensSecure = await checkJWTTokenSecurity();
+    const cookiesSecure = checkCookieSecurity();
 
     const allChecks = {
       ...basicChecks,
@@ -113,27 +88,15 @@ export default function SecurityStatus() {
   // Verificar si los JWT tokens están siendo enviados de forma segura
   const checkJWTTokenSecurity = async (): Promise<boolean> => {
     try {
-      // 1. Verificar si hay token en localStorage (inseguro)
+      // Verificar si hay token en localStorage (inseguro)
       const hasTokenInLocalStorage = typeof window !== 'undefined' && localStorage.getItem('token');
       
-      // Si hay token en localStorage, es inseguro
-      if (hasTokenInLocalStorage) {
-        console.log('⚠️ Found token in localStorage - INSECURE');
-        return false;
-      }
-      
-      // 2. Probar si podemos hacer una request autenticada sin Authorization header
-      // Esto indicaría que se están usando cookies httpOnly
-      const response = await fetch('/api/auth/me', {
-        credentials: 'include',
-      });
-      
-      // Si la request funciona sin token manual, significa que usa cookies httpOnly
-      const isAuthenticated = response.status === 200;
-      console.log('🔒 Authentication test:', { status: response.status, isAuthenticated });
-      return isAuthenticated;
+      // Verificar si hay cookies de autenticación
+      const hasAuthCookie = typeof document !== 'undefined' && document.cookie.includes('auth-token');
+
+      // Es seguro si usa cookies y NO usa localStorage
+      return hasAuthCookie && !hasTokenInLocalStorage;
     } catch (error) {
-      console.log('❌ Error checking JWT security:', error);
       return false;
     }
   };
@@ -142,13 +105,11 @@ export default function SecurityStatus() {
   const checkCookieSecurity = (): boolean => {
     if (typeof window === 'undefined') return false;
     
-    // Para cookies httpOnly, no podemos verlas desde JavaScript (eso es bueno)
-    // Pero podemos verificar si NO hay tokens en localStorage
-    const hasTokenInLocalStorage = localStorage.getItem('token');
-    console.log('🍪 Checking cookies:', { hasTokenInLocalStorage: !!hasTokenInLocalStorage });
+    // Verificar si hay cookies de autenticación configuradas
+    const cookies = document.cookie.split(';');
+    const authCookie = cookies.find(cookie => cookie.trim().startsWith('auth-token='));
     
-    // Si no hay token en localStorage Y el usuario está autenticado, probablemente esté usando cookies
-    return !hasTokenInLocalStorage && !!user;
+    return !!authCookie;
   };
 
   if (!user?.isAdmin) {
@@ -171,14 +132,6 @@ export default function SecurityStatus() {
             🛡️ ESTADO DE SEGURIDAD
           </h1>
           <p className="text-lg text-gray-300">Panel de monitoreo de seguridad del sistema</p>
-          
-          {/* Botón de refresh */}
-          <button
-            onClick={checkSecurityStatus}
-            className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium transition-colors"
-          >
-            🔄 Actualizar Estado
-          </button>
         </header>
 
         <div className="grid md:grid-cols-2 gap-8 mb-8">
@@ -197,17 +150,14 @@ export default function SecurityStatus() {
               <SecurityCheck
                 title="JWT Tokens Seguros"
                 status={securityChecks.jwtTokensSecure}
-                description={
-                  !user ? "Sistema configurado para usar cookies httpOnly (requiere login para verificar)" :
-                  securityChecks.jwtTokensSecure ? "Usando cookies httpOnly - tokens seguros" : "Usando localStorage o tokens visibles"
-                }
+                description={securityChecks.jwtTokensSecure ? "Usando cookies httpOnly" : "Tokens visibles en navegador"}
                 risk={securityChecks.jwtTokensSecure ? "" : "ALTO"}
               />
               
               <SecurityCheck
                 title="Rate Limiting"
                 status={securityChecks.rateLimit}
-                description="Protección contra ataques de fuerza bruta activada"
+                description="Protección contra ataques de fuerza bruta"
                 risk=""
               />
               
@@ -221,11 +171,8 @@ export default function SecurityStatus() {
               <SecurityCheck
                 title="Cookies Seguras"
                 status={securityChecks.cookiesSecure}
-                description={
-                  !user ? "Sistema configurado para cookies httpOnly (requiere login para verificar)" :
-                  securityChecks.cookiesSecure ? "Sistema usando cookies httpOnly para autenticación" : "Sin cookies de sesión detectadas"
-                }
-                risk={securityChecks.cookiesSecure ? "" : "MEDIO"}
+                description={securityChecks.cookiesSecure ? "Cookies de autenticación encontradas" : "Sin cookies de sesión"}
+                risk=""
               />
             </div>
           </div>
@@ -238,17 +185,7 @@ export default function SecurityStatus() {
               <div className="text-center py-8">
                 <div className="text-6xl mb-4">🛡️</div>
                 <h3 className="text-xl font-semibold text-green-400 mb-2">¡Sistema Seguro!</h3>
-                <p className="text-gray-300">
-                  {user ? 
-                    "No se detectaron vulnerabilidades críticas en este momento." :
-                    "Inicia sesión para verificar el estado completo de seguridad."
-                  }
-                </p>
-                {!user && (
-                  <p className="text-sm text-gray-400 mt-2">
-                    El sistema usa cookies httpOnly para proteger los tokens JWT.
-                  </p>
-                )}
+                <p className="text-gray-300">No se detectaron vulnerabilidades críticas en este momento.</p>
               </div>
             ) : (
               <div className="space-y-4">
